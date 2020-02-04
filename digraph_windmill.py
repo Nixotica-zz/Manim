@@ -744,3 +744,5 @@ class LOnHull(WindmillScene):
             p1 = inner_points[i]*1.1
             arrow = Arrow(p0, p1, color=RED)
             self.play(GrowArrow(arrow))
+
+# version control test
