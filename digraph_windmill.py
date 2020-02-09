@@ -705,7 +705,6 @@ class LOnHull(WindmillScene):
                   FadeOut(arc),
                   FadeOut(arc2),
                   FadeOut(pivot_dot),
-                  FadeOut(pivot_label),
                   FadeOut(windmill),
                   FadeOut(l_label))
         
@@ -734,9 +733,6 @@ class LOnHull(WindmillScene):
 
         l_label.next_to(pivot_dot, direction=3*LEFT+UP)
         self.play(Write(l_label))
-
-        self.wait(1)
-        self.play(FadeOut(l_label), FadeOut(windmill), FadeOut(inner_poly))
         self.wait(1)
 
         arrows = []
@@ -748,17 +744,18 @@ class LOnHull(WindmillScene):
             self.play(GrowArrow(arrows[i]))
 
         self.wait(1)
-        self.play(FadeOut(arrows[0]), FadeOut(arrows[1]),
+        self.play(FadeOut(l_label), FadeOut(windmill), FadeOut(inner_poly), 
+                  FadeOut(arrows[0]), FadeOut(arrows[1]),
                   FadeOut(arrows[2]), FadeOut(arrows[3]),
                   FadeOut(arrows[4]), FadeOut(inner_point))
         self.wait(1)
 
         p1 = Dot(point=[-3, -3, 0])
-        p1_label = TextMobject("$P_1$").next_to(p1, direction=LEFT)
+        p1_label = TextMobject("$P_{pivot}$").next_to(p1, direction=LEFT)
         self.play(ShowCreation(p1), Write(p1_label))
 
         p2 = Dot(point=[-2, 3, 0])
-        p2_label = TextMobject("$P_{pivot}$").next_to(p2, direction=LEFT)
+        p2_label = TextMobject("$P_2$").next_to(p2, direction=LEFT)
         self.play(ShowCreation(p2), Write(p2_label))
 
         points = np.array([p1.get_center(), p2.get_center()])
@@ -768,12 +765,12 @@ class LOnHull(WindmillScene):
         self.wait(1)
 
         m = TextMobject("$m$").next_to(p1.get_center(), direction=UP+RIGHT*1.5).set_color(RED)
-        m.shift(0.5*LEFT + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
+        m.shift(0.75*LEFT + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
         self.play(Write(m))
         self.wait(1)
 
         nminusm = TextMobject("$n-m$").next_to(p1.get_center(),direction=UP+RIGHT).set_color(RED)
-        nminusm.shift(RIGHT + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
+        nminusm.shift(0.5*RIGHT + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
         self.play(Write(nminusm))
         self.wait(1)
 
@@ -782,11 +779,11 @@ class LOnHull(WindmillScene):
         self.wait(1)
 
         m2 = TextMobject("$m$").next_to(p2.get_center(), direction=DOWN+RIGHT).set_color(GREEN)
-        m2.shift(UP + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
+        m2.shift(UP + DOWN*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
         self.play(Write(m2))
         self.wait(1)
 
-        nminusm2 = TextMobject("$n-m$").next_to(p2.get_center(),direction=DOWN+RIGHT).set_color(GREEN)
-        nminusm2.shift(DOWN + UP*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
+        nminusm2 = TextMobject("$n-m$").next_to(p2.get_center(),direction=DOWN).set_color(GREEN)
+        nminusm2.shift(DOWN + DOWN*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
         self.play(Write(nminusm2))
         self.wait(1)
