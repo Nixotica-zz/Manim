@@ -787,3 +787,58 @@ class LOnHull(WindmillScene):
         nminusm2.shift(DOWN + DOWN*math.sin(windmill.get_angle()) + RIGHT*math.cos(windmill.get_angle()))
         self.play(Write(nminusm2))
         self.wait(1)
+
+        self.play(FadeOut(m), FadeOut(nminusm), FadeOut(nminusm2), FadeOut(m2), FadeOut(windmill), FadeOut(windmill2))
+
+        dots = []
+        dot1 = Dot(point = ORIGIN + 0.5*RIGHT + DOWN)
+        dot2 = Dot(point = ORIGIN + RIGHT + 0.5*UP)
+        dot3 = Dot(point = ORIGIN + LEFT + 0.5*DOWN)
+        dots.append(dot1)
+        dots.append(dot2)
+        dots.append(dot3)
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+        visarrows = []
+        for i in range(len(dots)):
+            arrow1 = Arrow(p1.get_center(), dots[i].get_center())
+            arrow2 = Arrow(p2.get_center(), dots[i].get_center())
+            self.play(GrowArrow(arrow1))            
+            self.play(GrowArrow(arrow2))
+            visarrows.append(arrow1)
+            visarrows.append(arrow2)
+
+        self.wait(1)
+        self.play(FadeOut(visarrows[0]), FadeOut(visarrows[1]), FadeOut(visarrows[2]), FadeOut(visarrows[3]), FadeOut(visarrows[4]), FadeOut(visarrows[5]))
+        for i in range(len(dots)):
+            arrow1 = Arrow(dots[i].get_center(), p1.get_center(), color=RED, opacity=0.2)
+            arrow2 = Arrow(dots[i].get_center(), p2.get_center(), color=RED, opacity=0.2)
+            self.play(GrowArrow(arrow1))
+            self.play(GrowArrow(arrow2))
+
+        self.wait(1)
+
+class HullToInsideComplete(GraphScene):
+    def construct(self):
+        hulldots = []
+        dot1 = Dot(point = ORIGIN + 2*UP)
+        dot2 = Dot(point = ORIGIN + 3*LEFT + 2*DOWN)
+        dot3 = Dot(point = ORIGIN + 4*RIGHT + 3*DOWN)
+        hulldots.append(dot1)
+        hulldots.append(dot2)
+        hulldots.append(dot3)
+
+        innerdots = []
+        dot1 = Dot(point = ORIGIN)
+        dot2 = Dot(point = ORIGIN + UP + 0.5*RIGHT)
+        innerdots.append(dot1)
+        innerdots.append(dot2)
+
+        for i in range(len(hulldots)):
+            self.play(ShowCreation(hulldots[i]))
+        for i in range(len(innerdots)):
+            self.play(ShowCreation(innerdots[i]))
+        for i in range(len(hulldots)):
+            for j in range(len(innerdots)):
+                arrow = Arrow(hulldots[i].get_center(), innerdots[j].get_center())
+                self.play(GrowArrow(arrow))
