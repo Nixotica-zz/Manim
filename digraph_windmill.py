@@ -820,17 +820,23 @@ class LOnHull(WindmillScene):
 
 class HullToInsideComplete(GraphScene):
     def construct(self):
+        inner_points = np.array([[1 , 2, 0],
+                                 [-2, -2, 0],
+                                 [5, -3, 0]])
+        hull = Polygon(*inner_points, color=WHITE, fill_color=WHITE, fill_opacity=0.1)
+        self.play(ShowCreation(hull))
+
         hulldots = []
-        dot1 = Dot(point = ORIGIN + 2*UP)
-        dot2 = Dot(point = ORIGIN + 3*LEFT + 2*DOWN)
-        dot3 = Dot(point = ORIGIN + 4*RIGHT + 3*DOWN)
+        dot1 = Dot(point = ORIGIN + 2*UP + RIGHT)
+        dot2 = Dot(point = ORIGIN + 2*LEFT + 2*DOWN)
+        dot3 = Dot(point = ORIGIN + 5*RIGHT + 3*DOWN)
         hulldots.append(dot1)
         hulldots.append(dot2)
         hulldots.append(dot3)
 
         innerdots = []
-        dot1 = Dot(point = ORIGIN)
-        dot2 = Dot(point = ORIGIN + UP + 0.5*RIGHT)
+        dot1 = Dot(point = ORIGIN + 1*RIGHT)
+        dot2 = Dot(point = ORIGIN + 1.5*DOWN + 1.5*RIGHT)
         innerdots.append(dot1)
         innerdots.append(dot2)
 
@@ -838,7 +844,473 @@ class HullToInsideComplete(GraphScene):
             self.play(ShowCreation(hulldots[i]))
         for i in range(len(innerdots)):
             self.play(ShowCreation(innerdots[i]))
+
+        self.wait(1)
+
+        accounted = TextMobject("Accounted for:")
+        accounted.to_corner(corner = UP + LEFT)
+        self.play(Write(accounted))
+    
+        perms = TextMobject("$$(P_{hull}, P_{inner})$$")
+        perms.next_to(accounted, direction=DOWN)
+        self.play(Write(perms))
+
+        self.wait(1)
+
+        arrows = []
         for i in range(len(hulldots)):
             for j in range(len(innerdots)):
                 arrow = Arrow(hulldots[i].get_center(), innerdots[j].get_center())
+                arrows.append(arrow)
                 self.play(GrowArrow(arrow))
+
+        self.wait(1)
+
+        self.play(FadeOut(arrows[0]), FadeOut(arrows[1]), FadeOut(arrows[2]), FadeOut(arrows[3]), FadeOut(arrows[4]), FadeOut(arrows[5]))
+
+        self.wait(1)
+
+        notaccounted = TextMobject("Not accounted for:").set_color(RED)
+        notaccounted.to_edge(edge=LEFT)
+        self.play(Write(notaccounted))
+    
+        notperms = TextMobject("$$(P_{inner}, P_{hull})$$").set_color(RED)
+        notperms.next_to(notaccounted, direction=DOWN)
+        self.play(Write(notperms))
+
+        self.wait(1)
+
+        for i in range(len(innerdots)):
+            for j in range(len(hulldots)):
+                arrow = Arrow(innerdots[i].get_center(), hulldots[j].get_center()).set_color(RED)
+                self.play(GrowArrow(arrow))
+
+        self.wait(1)
+
+class InnerHullPNotIntersect(WindmillScene):
+    def construct(self):
+        points = np.array([[0 , 3, 0],
+                        [3, -3, 0],
+                        [-3, -3, 0],
+                        [0, 1.5, 0],
+                        [1.5, -1.5, 0],
+                        [-1.5, -1.5, 0],
+                        [0, 0, 0]])
+
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        self.wait(1)
+
+        inner_point = [0, 0, 0]
+        outer_point = [-1.5, -1.5, 0]
+        P_label = TextMobject("$P$").next_to(inner_point, direction=DOWN)
+        self.play(Write(P_label))
+
+        self.wait(1)
+
+        outer_windmill = self.get_windmill(points, outer_point, angle=3*PI/4)
+        outer_pivot_dot = self.get_pivot_dot(outer_windmill)
+
+        outer_label = TextMobject("$\ell$").next_to(outer_pivot_dot).shift(DOWN+RIGHT)
+        self.play(ShowCreation(outer_windmill), Write(outer_label))
+
+        inner_windmill = self.get_windmill(points, inner_point, angle=0)
+        inner_pivot_dot = self.get_pivot_dot(inner_windmill)
+
+        inner_label = TextMobject("$\ell'$").next_to(inner_pivot_dot, direction=UP).shift(RIGHT)
+        self.play(ShowCreation(inner_windmill), Write(inner_label))
+
+        self.wait(1)
+
+        n1 = TextMobject("$n=1$").next_to(outer_pivot_dot, direction=LEFT)
+        self.play(Write(n1))
+
+        self.wait(1)
+        
+        n2 = TextMobject("$n=2$").next_to(inner_pivot_dot, direction=UP+LEFT)
+        self.play(Write(n2))
+
+        self.play(FadeOut(n1), FadeOut(n2), FadeOut(inner_label), FadeOut(outer_label))
+        
+        self.wait(1)
+
+        self.add(outer_windmill)
+        self.add(dots)
+
+        self.let_windmill_run(outer_windmill, 9.45)
+
+        self.wait(1)
+
+        n1 = TextMobject("$n=1$").next_to([0, 1.5, 0], direction=UP).shift(RIGHT*2)
+        n2.next_to(inner_pivot_dot, direction=UP).shift(RIGHT*2)
+
+        self.play(Write(n1), Write(n2))
+
+        self.wait(1)
+
+        outer_hull = np.array([[-3, -3, 0],
+                                 [0, 3, 0],
+                                 [3, -3, 0]])
+        outer_hull = Polygon(*outer_hull, color=WHITE, fill_color=WHITE, fill_opacity=0.1)
+        self.play(ShowCreation(outer_hull))
+
+        inner_hull = np.array([[-1.5, -1.5, 0],
+                               [0, 1.5, 0],
+                               [1.5, -1.5, 0]])
+        inner_hull = Polygon(*inner_hull, color=GREEN, fill_color=GREEN, fill_opacity=0.1)
+        self.play(ShowCreation(inner_hull))
+
+        self.wait(1)
+
+        self.wait(1)
+
+        self.play(FadeOut(outer_hull), FadeOut(inner_hull), FadeOut(n1), FadeOut(n2), FadeOut(inner_windmill), FadeOut(outer_windmill), FadeOut(P_label))
+
+class InnerAllProof(WindmillScene):
+    def construct(self):
+        points = np.array([[-1.5 , 2, 0],
+                          [-3.5, -2, 0],
+                          [4.5, -3, 0],
+                          [-1, 0, 0],
+                          [0.5, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        early_windmill = self.get_windmill(points, points[1], angle=PI/6)
+        early_pivot_dot = self.get_pivot_dot(early_windmill)
+
+        late_windmill = self.get_windmill(points, points[0], angle=3*PI/5)
+        late_pivot_dot = self.get_pivot_dot(late_windmill)
+
+        P_inner = TextMobject("$P_{inner}$").next_to(points[4]).set_color(RED)
+        self.play(Write(P_inner))
+
+        self.wait(1)
+
+        self.play(ShowCreation(early_windmill))
+
+        early_label = TextMobject("$\ell_0$").next_to(early_pivot_dot, direction=LEFT).shift(LEFT).set_color(RED)
+        self.play(Write(early_label))
+
+        self.wait(1)
+
+        n1 = TextMobject("$n=2$").next_to(early_pivot_dot, direction=UP).shift(UP).set_color(RED)
+        m1 = TextMobject("$m=2$").next_to(early_pivot_dot, direction=DOWN).shift(DOWN).set_color(RED)
+        self.play(Write(n1), Write(m1))
+
+        self.wait(1)
+
+        P2 = TextMobject("$P_2$").next_to(points[3], direction=LEFT).set_color(GREEN)
+        self.play(Write(P2))
+
+        self.play(ShowCreation(late_windmill))
+
+        late_label = TextMobject("$\ell_1$").next_to(late_pivot_dot, direction=RIGHT).set_color(GREEN)
+        self.play(Write(late_label))
+
+        self.wait(1)
+
+        n2 = TextMobject("$n=2$").next_to(late_pivot_dot, direction=RIGHT).shift(UP).set_color(GREEN)
+        m2 = TextMobject("$m=2$").next_to(late_pivot_dot, direction=LEFT).shift(DOWN).set_color(GREEN)
+        self.play(Write(n2), Write(m2))
+
+        self.wait(1)
+
+        self.play(FadeOut(n1), FadeOut(n2), FadeOut(m1), FadeOut(m2))
+
+        implication = TextMobject("$180^{\circ}$ turn $\Rightarrow$").to_corner(corner = UP+ LEFT)
+        implication2 = TextMobject("$\ell_0 = \ell_1$ at some point.").to_corner(corner = UP + LEFT).shift(DOWN*0.5)
+        self.play(Write(implication))
+        self.play(Write(implication2))
+
+        self.wait(1)
+
+        self.play(FadeOut(implication), FadeOut(implication2), FadeOut(early_label), FadeOut(late_label))
+
+        self.let_windmill_run(early_windmill, 7.11)
+        
+        self.wait(1)
+
+        self.play(FadeOut(early_windmill), FadeOut(late_windmill), FadeOut(P2))
+        self.wait(1)
+
+        P_Hull = TextMobject("$P_{hull}$").next_to(points[1], direction=RIGHT).set_color(BLUE)
+        self.play(Write(P_Hull))
+
+        early_windmill = self.get_windmill(points, points[1], angle=PI/3).set_color(BLUE)
+        self.play(ShowCreation(early_windmill))
+
+        n1 = TextMobject("$n=1$").next_to(early_pivot_dot, direction=UP).shift(UP).set_color(BLUE)
+        m1 = TextMobject("$m=3$").next_to(early_pivot_dot, direction=DOWN).shift(DOWN+RIGHT).set_color(BLUE)
+
+        self.play(Write(n1), Write(m1))
+
+        self.wait(1)
+
+        late_windmill = self.get_windmill(points, points[4], angle=PI/6)
+        late_pivot_dot = self.get_pivot_dot(late_windmill)
+
+        self.play(ShowCreation(late_windmill))
+        self.wait(1)
+
+        n2 = TextMobject("$n=1$").next_to(late_pivot_dot, direction=UP).shift(UP).set_color(RED)
+        m2 = TextMobject("$m=3$").next_to(late_pivot_dot, direction=DOWN).shift(DOWN).set_color(RED)
+
+        self.play(Write(n2), Write(m2))
+        self.wait(1)
+
+        self.play(FadeOut(n1), FadeOut(n2), FadeOut(m1), FadeOut(m2))
+
+        self.let_windmill_run(early_windmill, 14.65)
+
+        self.wait(1)
+
+        self.play(FadeOut(P_Hull), FadeOut(P_inner), FadeOut(early_windmill), FadeOut(late_windmill))
+
+        comb = DoubleArrow(early_pivot_dot.get_center(), late_pivot_dot.get_center()).set_color(YELLOW)
+        self.play(ShowCreation(comb))
+
+        exp = TextMobject("Both combinations accounted for.").next_to(late_pivot_dot, direction=DOWN).shift(DOWN).set_color(YELLOW)
+        self.play(Write(exp))
+
+        self.wait(1)
+
+class Complete1(WindmillScene):
+    CONFIG = {
+        "draw_arrows": "True"
+    }
+    def construct(self):
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_1$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.5)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+        
+        points = np.array([[0 , 3, 0],
+                          [-3, -2, 0],
+                          [0, 0, 0],
+                          [1, 2, 0],
+                          [-2, 2, 0],
+                          [3, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        windmill = self.get_windmill(points, points[1], angle=PI/2)
+        pivot_dot = self.get_pivot_dot(windmill)
+
+        P_init = TextMobject("$P_0$").next_to(pivot_dot, direction=LEFT)
+
+        self.play(Write(P_init))
+
+        self.wait(3)
+
+        self.play(ShowCreation(windmill))
+
+        self.let_windmill_run_angle(windmill, 2*PI)
+
+class Complete2(WindmillScene):
+    CONFIG = {
+        "draw_arrows": "True"
+    }
+    def construct(self):
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_2$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.5)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+        
+        points = np.array([[0 , 3, 0],
+                          [-3, -2, 0],
+                          [0, 0, 0],
+                          [1, 2, 0],
+                          [-2, 2, 0],
+                          [3, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        windmill = self.get_windmill(points, points[1], angle=PI/3)
+        pivot_dot = self.get_pivot_dot(windmill)
+
+        P_init = TextMobject("$P_0$").next_to(pivot_dot, direction=LEFT)
+
+        self.play(Write(P_init))
+
+        self.wait(3)
+
+        self.play(ShowCreation(windmill))
+
+        self.let_windmill_run_angle(windmill, 4*PI)
+
+class Complete3(WindmillScene):
+    CONFIG = {
+        "draw_arrows": "True"
+    }
+    def construct(self):
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_3$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.5)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+        
+        points = np.array([[0 , 3, 0],
+                          [-3, -2, 0],
+                          [0, 0, 0],
+                          [1, 2, 0],
+                          [-2, 2, 0],
+                          [3, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        windmill = self.get_windmill(points, points[1], angle=2*PI/7)
+        pivot_dot = self.get_pivot_dot(windmill)
+
+        P_init = TextMobject("$P_0$").next_to(pivot_dot, direction=LEFT)
+
+        self.play(Write(P_init))
+
+        self.wait(3)
+
+        self.play(ShowCreation(windmill))
+
+        self.let_windmill_run_angle(windmill, 4*PI)
+
+class Complete4(WindmillScene):
+    CONFIG = {
+        "draw_arrows": "True"
+    }
+    def construct(self):
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_4$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.5)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+        
+        points = np.array([[0 , 3, 0],
+                          [-3, -2, 0],
+                          [0, 0, 0],
+                          [1, 2, 0],
+                          [-2, 2, 0],
+                          [3, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        windmill = self.get_windmill(points, points[1], angle=PI/4-0.1)
+        pivot_dot = self.get_pivot_dot(windmill)
+
+        P_init = TextMobject("$P_0$").next_to(pivot_dot, direction=LEFT)
+
+        self.play(Write(P_init))
+
+        self.wait(3)
+
+        self.play(ShowCreation(windmill))
+
+        self.let_windmill_run_angle(windmill, 4*PI)
+
+class Complete5(WindmillScene):
+    CONFIG = {
+        "draw_arrows": "True"
+    }
+    def construct(self):
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_5$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.5)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+        
+        points = np.array([[0 , 3, 0],
+                          [-3, -2, 0],
+                          [0, 0, 0],
+                          [1, 2, 0],
+                          [-2, 2, 0],
+                          [3, -1, 0]])
+        
+        dots = self.get_dots(points)
+
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+
+        windmill = self.get_windmill(points, points[1], angle=PI/6)
+        pivot_dot = self.get_pivot_dot(windmill)
+
+        P_init = TextMobject("$P_0$").next_to(pivot_dot, direction=LEFT)
+
+        self.play(Write(P_init))
+
+        self.wait(3)
+
+        self.play(ShowCreation(windmill))
+
+        self.let_windmill_run_angle(windmill, 4*PI)
+
+class CompleteFinal(GraphScene):
+    def construct(self):
+        dots = []
+        dot1 = Dot(point = ORIGIN + 3*UP)
+        dot2 = Dot(point = ORIGIN + 3*LEFT + 2*DOWN)
+        dot3 = Dot(point = ORIGIN)
+        dot4 = Dot(point = ORIGIN + RIGHT + 2*UP)
+        dot5 = Dot(point = ORIGIN + 2*LEFT + 2*UP)
+        dot6 = Dot(point = ORIGIN + 3*RIGHT + DOWN)
+        dots.append(dot1)
+        dots.append(dot2)
+        dots.append(dot3)
+        dots.append(dot4)
+        dots.append(dot5)
+        dots.append(dot6)
+        for i in range(len(dots)):
+            self.play(ShowCreation(dots[i]))
+        for i in range(len(dots)):
+            for j in range(i + 1, len(dots)):
+                arrow = DoubleArrow(dots[i].get_center(), dots[j].get_center())
+                self.play(GrowArrow(arrow))
+
+        border = [(-5, -3.5, 0),
+                    (-5, 3.5, 0),
+                    (5, 3.5, 0),
+                    (5, -3.5, 0)]
+
+        S_box = Polygon(*border, color=GREEN)
+        S_label = TextMobject("$S_{\cup}$").scale(2).to_corner(corner=UP+RIGHT).shift(LEFT*0.25)
+
+        self.play(ShowCreation(S_box), Write(S_label))
+
+        self.wait(1)
